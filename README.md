@@ -68,15 +68,102 @@ These implementations are included solely for performance comparison and are not
 Install dependencies listed in `src/requirements.txt`:
 
 ```bash
-pip install -r src/requirements.txt
+python -m venv .venv
+
+# Windows
+.\.venv\Scripts\python -m pip install --upgrade pip
+.\.venv\Scripts\python -m pip install -r src/requirements.txt
+
+# macOS/Linux
+./.venv/bin/python -m pip install --upgrade pip
+./.venv/bin/python -m pip install -r src/requirements.txt
 ```
+
+### Neo4j (Local / Free)
+
+If you want to run everything locally (free), use **Neo4j Desktop** (recommended on Windows):
+
+- Create a local DBMS (Neo4j **5.x** recommended) and start it
+- Default local endpoints are:
+  - Browser UI: `http://localhost:7474`
+  - Bolt URI: `bolt://localhost:7687`
+
+Then create `src/.env` (copy from `src/env.template`) and set:
+
+- `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD`
+- `NEO4J_URI_AURA`, `NEO4J_USERNAME_AURA`, `NEO4J_PASSWORD_AURA`
+
+To verify Neo4j connectivity (without printing secrets):
+
+```bash
+# Windows
+.\.venv\Scripts\python src\util\check_neo4j.py
+
+# macOS/Linux
+./.venv/bin/python src/util/check_neo4j.py
+```
+
+### Milvus (Vector DB)
+
+This project uses `pymilvus`.
+
+- **Linux/macOS**: you can use a local Milvus Lite database file.
+- **Windows**: **Milvus Lite is not supported** by `pymilvus`, so you must run a Milvus server (e.g. via Docker) and connect using `MILVUS_URI`.
+
+#### Windows (Docker) quick start
+
+1) Start Milvus Standalone:
+
+```bash
+docker run -d --name milvus-standalone ^
+  -p 19530:19530 -p 9091:9091 ^
+  milvusdb/milvus:v2.4.9 ^
+  milvus run standalone
+```
+
+2) In `src/.env` set:
+
+- `MILVUS_URI="http://localhost:19530"`
+
+#### Start fresh (reset Milvus)
+
+- **Full reset (Docker, deletes data volumes)**:
+
+```bash
+docker compose -f milvus-standalone-docker-compose.yml down -v
+docker compose -f milvus-standalone-docker-compose.yml up -d
+```
+
+- **Soft reset (drop only this repo's collections)**:
+
+```bash
+# Windows
+.\.venv\Scripts\python src\util\reset_milvus.py
+
+# macOS/Linux
+./.venv/bin/python src/util/reset_milvus.py
+```
+
+### Using Groq (no OpenAI key) — **recommended free setup**
+
+Groq can be used for **LLM generation**, but it does **not** provide embeddings. To run fully without OpenAI, set:
+
+- `LLM_MODE="groq"`
+- `GROQ_API_KEY="..."`
+- `EMBEDDING_PROVIDER="local"`
+
+Copy `src/env.template` → `src/.env` and adjust values.
 
 ### Running the Program
 
 Switch into the src/ directory and run the main program:
 ```bash
 cd src
-python main.py
+# Windows
+..\.\.venv\Scripts\python main.py
+
+# macOS/Linux
+../.venv/bin/python main.py
 ```
 
 ## 🔐 Configuration

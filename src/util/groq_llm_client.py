@@ -3,18 +3,21 @@ from groq import Groq, AsyncGroq
 from typing import List, Optional, Union
 from neo4j_graphrag.message_history import MessageHistory
 from neo4j_graphrag.types import LLMMessage
+import os
 
 TIMEOUT = 300
 class GROQLLM(LLMInterface):
     def __init__(
         self,
-        model: str = "deepseek-r1-distill-llama-70b", # llama3-8b-8192 / llama-3.1-8b-instant / deepseek-r1-distill-llama-70b
+        # Use an env override so model deprecations can be handled without code changes.
+        # If the default ever deprecates, set GROQ_MODEL in src/.env.
+        model: str = None,  # e.g. llama-3.3-70b-versatile / llama-3.1-8b-instant
         temp: float = None,
         response_format_json: bool = False
     ):
         self.client = Groq(timeout=TIMEOUT) # longer timeout than default of 60s
         self.aclient = AsyncGroq(timeout=TIMEOUT)
-        self.model = model
+        self.model = model or os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
         self.temp = temp
         self.response_format_json = response_format_json
 

@@ -26,6 +26,9 @@ def get_user_choice(prompt, options):
                 return options[choice - 1]
             else:
                 print("Invalid choice. Please try again.")
+        except EOFError:
+            # Makes the program exit cleanly in non-interactive environments (e.g. CI / piped execution)
+            raise SystemExit("No input received (EOF). Exiting.")
         except ValueError:
             print("Please enter a number.")
 
